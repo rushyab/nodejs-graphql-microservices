@@ -1,0 +1,98 @@
+version: '3'
+
+services:
+  postgres-db:
+    container_name: postgres_db
+    image: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_USER: ${POSTGRESQL_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRES_MULTIPLE_DATABASES: ${AUTH_SERVICE_DB_NAME},${AUTH_SERVICE_DB_NAME}_test,${BLOG_SERVICE_DB_NAME},${BLOG_SERVICE_DB_NAME}_test
+    ports:
+      - '${POSTGRESQL_DB_PORT}:${POSTGRESQL_DB_PORT}'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./pg-init-scripts:/docker-entrypoint-initdb.d
+
+  auth:
+    container_name: auth
+    build:
+      context: ../auth
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres-db
+    restart: on-failure
+    env_file: ../auth/.env
+    ports:
+      - '${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}'
+    environment: # Will override the environment variables in context
+      - NODE_ENV=${NODE_ENV}
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - AUTH_SERVICE_NAME=${AUTH_SERVICE_NAME}
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DB_NAME=${AUTH_SERVICE_DB_NAME}
+      - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
+      - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
+      - ACCESS_JWT_SECRET=${ACCESS_JWT_SECRET}
+      - APOLLO_KEY=${APOLLO_KEY}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+    volumes:
+      - ../auth:/usr/src/app
+      - node_modules:/usr/src/app/node_modules/
+
+  blog:
+    container_name: blog
+    build:
+      context: ../blog
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres-db
+    restart: on-failure
+    env_file: ../blog/.env
+    ports:
+      - '${BLOG_SERVICE_PORT}:${BLOG_SERVICE_PORT}'
+    environment: # Will override the environment variables in context
+      - NODE_ENV=${NODE_ENV}
+      - BLOG_SERVICE_PORT=${BLOG_SERVICE_PORT}
+      - BLOG_SERVICE_NAME=${BLOG_SERVICE_NAME}
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DB_NAME=${BLOG_SERVICE_DB_NAME}
+      - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
+      - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
+      - APOLLO_KEY=${APOLLO_KEY}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+    volumes:
+      - ../blog:/usr/src/app
+
+  gateway:
+    container_name: gateway
+    build:
+      context: ../gateway
+      dockerfile: Dockerfile
+    # depends_on:
+    #   - auth
+    #   - blog
+    restart: on-failure
+    env_file: ../gateway/.env
+    ports:
+      - '${GATEWAY_SERVICE_PORT}:${GATEWAY_SERVICE_PORT}'
+    environment: # Will override the environment variables in context
+      - NODE_ENV=${NODE_ENV}
+      - GATEWAY_SERVICE_PORT=${GATEWAY_SERVICE_PORT}
+      - GATEWAY_SERVICE_NAME=${GATEWAY_SERVICE_NAME}
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - AUTH_SERVICE_NAME=${AUTH_SERVICE_NAME}
+      - BLOG_SERVICE_PORT=${BLOG_SERVICE_PORT}
+      - BLOG_SERVICE_NAME=${BLOG_SERVICE_NAME}
+      - ACCESS_JWT_SECRET=${ACCESS_JWT_SECRET}
+      - APOLLO_KEY=${APOLLO_KEY}
+    volumes:
+      - ../gateway:/usr/src/app
+      - node_modules:/usr/src/app/node_modules/
+
+volumes:
+  node_modules:
+  pgdata:

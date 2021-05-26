@@ -1,0 +1,92 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint",
+    "jest"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "./node_modules/eslint-config-airbnb-base/rules/best-practices.js",
+    "./node_modules/eslint-config-airbnb-base/rules/errors.js",
+    "./node_modules/eslint-config-airbnb-base/rules/node.js",
+    "./node_modules/eslint-config-airbnb-base/rules/style.js",
+    "./node_modules/eslint-config-airbnb-base/rules/variables.js",
+    "./node_modules/eslint-config-airbnb-base/rules/es6.js",
+    "prettier",
+    "plugin:jest/all"
+  ],
+  "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "error",
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": [
+      "error"
+    ],
+    "class-methods-use-this": "off",
+    "max-classes-per-file": "off",
+    "no-empty-function": "off",
+    "@typescript-eslint/no-empty-function": [
+      "error"
+    ],
+    "no-unused-expressions": "off",
+    "jest/prefer-expect-assertions": "off",
+    "jest/expect-expect": "off",
+    "jest/no-hooks": [
+      "error",
+      {
+        "allow": [
+          "beforeAll",
+          "beforeEach",
+          "afterAll",
+          "afterEach"
+        ]
+      }
+    ],
+    "no-console": [
+      1,
+      {
+        "allow": [
+          "warn",
+          "info",
+          "error"
+        ]
+      }
+    ],
+    "no-param-reassign": [
+      2,
+      {
+        "props": false
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "*.test.ts",
+        "*.spec.ts",
+        "*.factory.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/unbound-method": "off",
+        "jest/unbound-method": "off"
+      }
+    }
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "project": "./tsconfig.json",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "modules": true,
+      "legacyDecorators": true
+    }
+  },
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest/globals": true
+  }
+}

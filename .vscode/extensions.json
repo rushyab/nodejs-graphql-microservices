@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "apollographql.vscode-apollo",
+    "coenraads.bracket-pair-colorizer",
+    "dbaeumer.vscode-eslint",
+  ]
+}
